@@ -24,7 +24,8 @@ export function getRelationshipDescription(entry: {
 
   // 1. Format inventory item models
   const modelLabel = modelNames.length > 1 ? "models" : "model";
-  const formattedModels = modelNames.length > 0 ? `${modelLabel} ${formatList(modelNames, "and")}` : "";
+  const formattedModels =
+    modelNames.length > 0 ? `( ${modelLabel} ${formatList(modelNames, "and")} )` : "";
 
   // 2. Format device compatibility strings (e.g., Apple MacBook Air 15" M3 Laptop)
   const deviceStrings = modelIds
@@ -42,21 +43,24 @@ export function getRelationshipDescription(entry: {
         ? mName
         : `${bName} ${mName}`;
 
-      return `${cleanModelName} ${fName}`.trim();
+      const familySegment = fName ? `( ${fName} )` : "";
+      return `${cleanModelName} ${familySegment}`.trim();
     })
     .filter(Boolean);
 
   const formattedDevices = deviceStrings.length > 0 ? formatList(deviceStrings, "and") : "";
 
   // 3. Assemble the sentence:
-  // "[Part] of [Make] make with [models] can be used with the [devices]"
+  // "[Part] of [Make] ( [models] ) can be used in [devices]"
   const partSegment = partName ? `${partName}` : "Inventory item";
-  const makeSegment = brandName ? `of ${brandName} make` : "of unknown make";
-  const modelSegment = formattedModels ? `with ${formattedModels}` : "";
-  const canBeUsedSegment = formattedDevices ? `can be used with the ${formattedDevices}` : "";
+  const brandSegment = brandName ? `of ${brandName}` : "";
+  const modelSegment = formattedModels;
+  const canBeUsedSegment = formattedDevices ? `can be used in ${formattedDevices}` : "";
 
-  const finalSentence = `${partSegment} ${makeSegment} ${modelSegment} ${canBeUsedSegment}`.replace(/\s+/g, " ").trim();
-  
+  const finalSentence = `${partSegment} ${brandSegment} ${modelSegment} ${canBeUsedSegment}`
+    .replace(/\s+/g, " ")
+    .trim();
+
   if (finalSentence.endsWith(".")) return finalSentence;
   return `${finalSentence}.`;
 }

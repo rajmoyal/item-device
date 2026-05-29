@@ -28,7 +28,9 @@ export function RelationshipPreview({ entry, index }: { entry: SavedEntry; index
         <Row label="Device models" chips={entry.modelNames} className="md:col-span-2" />
         {description && (
           <div className="md:col-span-2 border-t border-primary/20 pt-3 mt-1">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">Compatibility Description</div>
+            <div className="text-xs uppercase tracking-wide text-muted-foreground">
+              Compatibility Description
+            </div>
             <div className="mt-1 font-medium text-foreground italic">"{description}"</div>
           </div>
         )}

@@ -36,10 +36,10 @@ export const deviceBrands: DeviceBrand[] = [
 
 export const deviceModels: DeviceModel[] = [
   // Apple laptops
-  { id: "mod-mbp-14-m3", name: "MacBook Pro 14\" M3", brandId: "br-apple-lap" },
-  { id: "mod-mbp-16-m3", name: "MacBook Pro 16\" M3", brandId: "br-apple-lap" },
-  { id: "mod-mba-13-m2", name: "MacBook Air 13\" M2", brandId: "br-apple-lap" },
-  { id: "mod-mba-15-m3", name: "MacBook Air 15\" M3", brandId: "br-apple-lap" },
+  { id: "mod-mbp-14-m3", name: 'MacBook Pro 14" M3', brandId: "br-apple-lap" },
+  { id: "mod-mbp-16-m3", name: 'MacBook Pro 16" M3', brandId: "br-apple-lap" },
+  { id: "mod-mba-13-m2", name: 'MacBook Air 13" M2', brandId: "br-apple-lap" },
+  { id: "mod-mba-15-m3", name: 'MacBook Air 15" M3', brandId: "br-apple-lap" },
   { id: "mod-mba-intel", name: "MacBook Air Intel (A1932)", brandId: "br-apple-lap" },
   // Dell
   { id: "mod-dell-xps13", name: "XPS 13 9340", brandId: "br-dell-lap" },
@@ -66,8 +66,8 @@ export const deviceModels: DeviceModel[] = [
   { id: "mod-px8", name: "Pixel 8", brandId: "br-google-ph" },
   { id: "mod-px8p", name: "Pixel 8 Pro", brandId: "br-google-ph" },
   // Tablets
-  { id: "mod-ipad-pro13", name: "iPad Pro 13\" M4", brandId: "br-apple-tab" },
-  { id: "mod-ipad-air11", name: "iPad Air 11\" M2", brandId: "br-apple-tab" },
+  { id: "mod-ipad-pro13", name: 'iPad Pro 13" M4', brandId: "br-apple-tab" },
+  { id: "mod-ipad-air11", name: 'iPad Air 11" M2', brandId: "br-apple-tab" },
   { id: "mod-ipad-10", name: "iPad (10th gen)", brandId: "br-apple-tab" },
   { id: "mod-tab-s9", name: "Galaxy Tab S9", brandId: "br-samsung-tab" },
   { id: "mod-tab-s9u", name: "Galaxy Tab S9 Ultra", brandId: "br-samsung-tab" },

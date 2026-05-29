@@ -95,7 +95,7 @@ function ItemFirstPage() {
 
   const setItemBrand = (brandId: string) => {
     const matchedPart = itemParts.find(
-      (p) => p.name === form.selectedPartName && p.itemBrandId === brandId
+      (p) => p.name === form.selectedPartName && p.itemBrandId === brandId,
     );
     setForm({
       ...form,
@@ -135,9 +135,7 @@ function ItemFirstPage() {
     brandNames: deviceBrands
       .filter((b) => form.compat.brandIds.includes(b.id))
       .map((b) => `${b.name} (${deviceFamilies.find((f) => f.id === b.familyId)?.name})`),
-    modelNames: deviceModels
-      .filter((m) => form.compat.modelIds.includes(m.id))
-      .map((m) => m.name),
+    modelNames: deviceModels.filter((m) => form.compat.modelIds.includes(m.id)).map((m) => m.name),
     itemBrandName: itemBrands.find((b) => b.id === form.itemBrandId)?.name ?? "",
     itemPartName: itemParts.find((p) => p.id === form.itemPartId)?.name ?? "",
     itemPartModelNames: itemPartModels

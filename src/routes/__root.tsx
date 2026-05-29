@@ -73,13 +73,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Device Inventory Hub" },
-      { name: "description", content: "Device Inventory Hub manages and tracks device assets with detailed information." },
+      {
+        name: "description",
+        content: "Device Inventory Hub manages and tracks device assets with detailed information.",
+      },
       { property: "og:title", content: "Device Inventory Hub" },
-      { property: "og:description", content: "Device Inventory Hub manages and tracks device assets with detailed information." },
+      {
+        property: "og:description",
+        content: "Device Inventory Hub manages and tracks device assets with detailed information.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Device Inventory Hub" },
-      { name: "twitter:description", content: "Device Inventory Hub manages and tracks device assets with detailed information." },
+      {
+        name: "twitter:description",
+        content: "Device Inventory Hub manages and tracks device assets with detailed information.",
+      },
     ],
     links: [
       {

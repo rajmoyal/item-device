@@ -79,7 +79,10 @@ export function DeviceCompatibilityPicker({
                     const others = value.brandIds.filter(
                       (id) => !familyBrands.some((b) => b.id === id),
                     );
-                    setBrands([...others, ...ids.filter((id) => familyBrands.some((b) => b.id === id))]);
+                    setBrands([
+                      ...others,
+                      ...ids.filter((id) => familyBrands.some((b) => b.id === id)),
+                    ]);
                   }}
                   emptyMessage="No brands."
                 />
@@ -102,13 +105,12 @@ export function DeviceCompatibilityPicker({
                             key={m.id}
                             className={
                               "flex items-center gap-1.5 rounded border px-2 py-1 text-xs cursor-pointer transition-colors " +
-                              (checked ? "border-primary bg-primary/10" : "border-border hover:bg-accent")
+                              (checked
+                                ? "border-primary bg-primary/10"
+                                : "border-border hover:bg-accent")
                             }
                           >
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={() => toggleModel(m.id)}
-                            />
+                            <Checkbox checked={checked} onCheckedChange={() => toggleModel(m.id)} />
                             <span>{m.name}</span>
                           </label>
                         );

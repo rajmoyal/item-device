@@ -86,7 +86,7 @@ function InventoryPage() {
   const handleMakeChange = (brandId: string) => {
     setMake(brandId);
     const matchedPart = itemParts.find(
-      (p) => p.name === selectedPartName && p.itemBrandId === brandId
+      (p) => p.name === selectedPartName && p.itemBrandId === brandId,
     );
     if (matchedPart) {
       setPartId(matchedPart.id);
@@ -162,10 +162,14 @@ function InventoryPage() {
             <div className="grid gap-4 md:grid-cols-3">
               <Field label="Inventory item part" required>
                 <Select value={selectedPartName} onValueChange={handleSelectedPartNameChange}>
-                  <SelectTrigger><SelectValue placeholder="Select Part" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Part" />
+                  </SelectTrigger>
                   <SelectContent>
                     {uniquePartNames.map((name) => (
-                      <SelectItem key={name} value={name}>{name}</SelectItem>
+                      <SelectItem key={name} value={name}>
+                        {name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -173,11 +177,15 @@ function InventoryPage() {
               <Field label="Inventory item make" required>
                 <Select value={make} onValueChange={handleMakeChange} disabled={!selectedPartName}>
                   <SelectTrigger>
-                    <SelectValue placeholder={selectedPartName ? "Select Make" : "Pick part first"} />
+                    <SelectValue
+                      placeholder={selectedPartName ? "Select Make" : "Pick part first"}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {availableItemMakes.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -189,7 +197,9 @@ function InventoryPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {availablePartModels.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -199,13 +209,26 @@ function InventoryPage() {
             {/* Row 2 */}
             <div className="grid gap-4 md:grid-cols-3">
               <Field label="Part Number">
-                <Input value={partNumber} onChange={(e) => setPartNumber(e.target.value)} placeholder="Enter Part Number" />
+                <Input
+                  value={partNumber}
+                  onChange={(e) => setPartNumber(e.target.value)}
+                  placeholder="Enter Part Number"
+                />
               </Field>
               <Field label="Quantity" required>
-                <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+                <Input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                />
               </Field>
               <Field label="Cost Each" required>
-                <Input type="number" step="0.01" value={costEach} onChange={(e) => setCostEach(e.target.value)} />
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={costEach}
+                  onChange={(e) => setCostEach(e.target.value)}
+                />
               </Field>
             </div>
 
@@ -224,24 +247,42 @@ function InventoryPage() {
               </Field>
               <Field label="Vendor" required>
                 <Select value={vendor} onValueChange={setVendor}>
-                  <SelectTrigger><SelectValue placeholder="Select Vendor" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Vendor" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {vendors.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                    {vendors.map((v) => (
+                      <SelectItem key={v} value={v}>
+                        {v}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
               <Field label="Location #">
-                <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="A-1" />
+                <Input
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="A-1"
+                />
               </Field>
             </div>
 
             {/* Row 4 */}
             <div className="grid gap-4 md:grid-cols-3">
               <Field label="Invoice Number">
-                <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="Enter Invoice Number" />
+                <Input
+                  value={invoiceNumber}
+                  onChange={(e) => setInvoiceNumber(e.target.value)}
+                  placeholder="Enter Invoice Number"
+                />
               </Field>
               <Field label="Invoice Date">
-                <Input type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} />
+                <Input
+                  type="date"
+                  value={invoiceDate}
+                  onChange={(e) => setInvoiceDate(e.target.value)}
+                />
               </Field>
               <div />
             </div>
@@ -253,7 +294,10 @@ function InventoryPage() {
                   i
                 </div>
                 <div>
-                  <span className="font-semibold text-primary">Low Quantity Threshold:</span> The threshold for {selectedPartName.toLowerCase()} with {itemBrands.find((b) => b.id === make)?.name ?? ""} make with {itemPartModels.find((m) => m.id === partModelId)?.name ?? ""} model is 5.
+                  <span className="font-semibold text-primary">Low Quantity Threshold:</span> The
+                  threshold for {selectedPartName.toLowerCase()} with{" "}
+                  {itemBrands.find((b) => b.id === make)?.name ?? ""} make with{" "}
+                  {itemPartModels.find((m) => m.id === partModelId)?.name ?? ""} model is 5.
                 </div>
               </div>
             )}
@@ -264,9 +308,7 @@ function InventoryPage() {
                 checked={worksWithOthers}
                 onCheckedChange={(c) => setWorksWithOthers(c === true)}
               />
-              <span className="text-sm font-semibold">
-                Does this part work with other devices?
-              </span>
+              <span className="text-sm font-semibold">Does this part work with other devices?</span>
             </label>
 
             {worksWithOthers && (

@@ -139,7 +139,7 @@ function Index() {
 
   const setItemBrand = (brandId: string) => {
     const matchedPart = itemParts.find(
-      (p) => p.name === form.selectedPartName && p.itemBrandId === brandId
+      (p) => p.name === form.selectedPartName && p.itemBrandId === brandId,
     );
     setForm({
       ...form,
@@ -161,15 +161,11 @@ function Index() {
 
   const buildEntry = (): SavedEntry => ({
     ...form,
-    familyNames: deviceFamilies
-      .filter((f) => form.familyIds.includes(f.id))
-      .map((f) => f.name),
+    familyNames: deviceFamilies.filter((f) => form.familyIds.includes(f.id)).map((f) => f.name),
     brandNames: deviceBrands
       .filter((b) => form.brandIds.includes(b.id))
       .map((b) => `${b.name} (${deviceFamilies.find((f) => f.id === b.familyId)?.name})`),
-    modelNames: deviceModels
-      .filter((m) => form.modelIds.includes(m.id))
-      .map((m) => m.name),
+    modelNames: deviceModels.filter((m) => form.modelIds.includes(m.id)).map((m) => m.name),
     itemBrandName: itemBrands.find((b) => b.id === form.itemBrandId)?.name ?? "",
     itemPartName: itemParts.find((p) => p.id === form.itemPartId)?.name ?? "",
     itemPartModelNames: itemPartModels
@@ -222,15 +218,12 @@ function Index() {
       </div>
 
       <main className="mx-auto max-w-6xl px-6 py-8 space-y-6">
-        {lastEntry && (
-          <RelationshipPreview entry={lastEntry} index={savedEntries.length - 1} />
-        )}
+        {lastEntry && <RelationshipPreview entry={lastEntry} index={savedEntries.length - 1} />}
 
         {savedEntries.length > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <CheckCircle2 className="h-4 w-4 text-primary" />
-            {savedEntries.length} entr{savedEntries.length === 1 ? "y" : "ies"} ready
-            to submit.
+            {savedEntries.length} entr{savedEntries.length === 1 ? "y" : "ies"} ready to submit.
           </div>
         )}
 
@@ -323,9 +316,7 @@ function Index() {
                   >
                     <SelectTrigger id="inventory-item-make">
                       <SelectValue
-                        placeholder={
-                          form.selectedPartName ? "Select a make" : "Pick a part first"
-                        }
+                        placeholder={form.selectedPartName ? "Select a make" : "Pick a part first"}
                       />
                     </SelectTrigger>
                     <SelectContent>
@@ -354,19 +345,15 @@ function Index() {
                       selected={form.itemPartModelIds}
                       onChange={(ids) => setForm({ ...form, itemPartModelIds: ids })}
                       emptyMessage={
-                        form.itemPartId
-                          ? "No models available."
-                          : "Pick a part and make first."
+                        form.itemPartId ? "No models available." : "Pick a part and make first."
                       }
                     />
                   </div>
                 </div>
               </div>
-
             </div>
           </CardContent>
         </Card>
-
 
         <div className="flex flex-wrap items-center justify-between gap-3 pb-12">
           <Button variant="ghost" onClick={handleReset} className="gap-2">
@@ -374,18 +361,14 @@ function Index() {
             Reset form
           </Button>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={handleAddMore}
-              disabled={!isValid}
-              className="gap-2"
-            >
+            <Button variant="outline" onClick={handleAddMore} disabled={!isValid} className="gap-2">
               <Plus className="h-4 w-4" />
               Add more
             </Button>
             <Button onClick={handleSubmit} className="gap-2">
               <Send className="h-4 w-4" />
-              Submit {savedEntries.length + (isValid ? 1 : 0) > 0 && (
+              Submit{" "}
+              {savedEntries.length + (isValid ? 1 : 0) > 0 && (
                 <Badge variant="secondary" className="ml-1">
                   {savedEntries.length + (isValid ? 1 : 0)}
                 </Badge>
@@ -406,23 +389,12 @@ function StepDot({ step }: { step: number }) {
   );
 }
 
-function StepHeader({
-  step,
-  title,
-  count,
-}: {
-  step: number;
-  title: string;
-  count?: number;
-}) {
+function StepHeader({ step, title, count }: { step: number; title: string; count?: number }) {
   return (
     <div className="flex items-center gap-2">
       <StepDot step={step} />
       <CardTitle className="text-base">{title}</CardTitle>
-      {typeof count === "number" && count > 0 && (
-        <Badge variant="secondary">{count}</Badge>
-      )}
+      {typeof count === "number" && count > 0 && <Badge variant="secondary">{count}</Badge>}
     </div>
   );
 }
-
