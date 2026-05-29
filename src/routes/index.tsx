@@ -26,6 +26,7 @@ import {
   itemPartModels,
 } from "@/lib/mock-data";
 import type { SavedEntry } from "@/lib/relationship-types";
+import { getRelationshipDescription } from "@/lib/compatibility-helper";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -45,6 +46,7 @@ const emptyState = {
   familyIds: [] as string[],
   brandIds: [] as string[],
   modelIds: [] as string[],
+  selectedPartName: "",
   itemBrandId: "",
   itemPartId: "",
   itemPartModelIds: [] as string[],
@@ -84,16 +86,23 @@ function Index() {
     [availableModels],
   );
 
-  // ----- Cascading item options -----
-  const availableParts = useMemo(
-    () => itemParts.filter((p) => p.itemBrandId === form.itemBrandId),
-    [form.itemBrandId],
-  );
+  // ----- Cascading item options (Part first, then Make, then Models) -----
+  const uniquePartNames = useMemo(() => {
+    const names = itemParts.map((p) => p.name);
+    return Array.from(new Set(names));
+  }, []);
 
-  const availablePartModels = useMemo(
-    () => itemPartModels.filter((m) => m.itemPartId === form.itemPartId),
-    [form.itemPartId],
-  );
+  const availableItemMakes = useMemo(() => {
+    if (!form.selectedPartName) return [];
+    const matchingParts = itemParts.filter((p) => p.name === form.selectedPartName);
+    const brandIds = Array.from(new Set(matchingParts.map((p) => p.itemBrandId)));
+    return itemBrands.filter((b) => brandIds.includes(b.id));
+  }, [form.selectedPartName]);
+
+  const availablePartModels = useMemo(() => {
+    if (!form.itemPartId) return [];
+    return itemPartModels.filter((m) => m.itemPartId === form.itemPartId);
+  }, [form.itemPartId]);
 
   // ----- Cascading cleanup helpers -----
   const setFamilies = (ids: string[]) => {
@@ -118,12 +127,26 @@ function Index() {
     setForm({ ...form, brandIds: ids, modelIds: stillValidModels });
   };
 
-  const setItemBrand = (id: string) => {
-    setForm({ ...form, itemBrandId: id, itemPartId: "", itemPartModelIds: [] });
+  const setSelectedPartName = (name: string) => {
+    setForm({
+      ...form,
+      selectedPartName: name,
+      itemBrandId: "",
+      itemPartId: "",
+      itemPartModelIds: [],
+    });
   };
 
-  const setItemPart = (id: string) => {
-    setForm({ ...form, itemPartId: id, itemPartModelIds: [] });
+  const setItemBrand = (brandId: string) => {
+    const matchedPart = itemParts.find(
+      (p) => p.name === form.selectedPartName && p.itemBrandId === brandId
+    );
+    setForm({
+      ...form,
+      itemBrandId: brandId,
+      itemPartId: matchedPart ? matchedPart.id : "",
+      itemPartModelIds: [],
+    });
   };
 
   // ----- Validation -----
@@ -131,6 +154,7 @@ function Index() {
     form.familyIds.length > 0 &&
     form.brandIds.length > 0 &&
     form.modelIds.length > 0 &&
+    !!form.selectedPartName &&
     !!form.itemBrandId &&
     !!form.itemPartId &&
     form.itemPartModelIds.length > 0;
@@ -260,78 +284,85 @@ function Index() {
         {/* Item selection — single row */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Item details</CardTitle>
+            <CardTitle className="text-base">Inventory item details</CardTitle>
             <CardDescription>
-              Choose the make, then the part, then the compatible part models.
+              Choose the part, then the make, then the compatible models.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-3 md:items-start">
-              <div className="space-y-2">
-                <Label htmlFor="item-brand" className="flex items-center gap-2">
-                  <StepDot step={4} />
-                  Item make
-                </Label>
-                <Select value={form.itemBrandId} onValueChange={setItemBrand}>
-                  <SelectTrigger id="item-brand">
-                    <SelectValue placeholder="Select a make" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {itemBrands.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>
-                        {b.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-3 md:items-start">
+                <div className="space-y-2">
+                  <Label htmlFor="inventory-item-part" className="flex items-center gap-2">
+                    <StepDot step={4} />
+                    Inventory item part
+                  </Label>
+                  <Select value={form.selectedPartName} onValueChange={setSelectedPartName}>
+                    <SelectTrigger id="inventory-item-part">
+                      <SelectValue placeholder="Select a part" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {uniquePartNames.map((name) => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className={"space-y-2 " + (!form.itemBrandId ? "opacity-60" : "")}>
-                <Label className="flex items-center gap-2">
-                  <StepDot step={5} />
-                  Item part
-                </Label>
-                <Select
-                  value={form.itemPartId}
-                  onValueChange={setItemPart}
-                  disabled={!form.itemBrandId}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={form.itemBrandId ? "Select a part" : "Pick a make first"}
+                <div className={"space-y-2 " + (!form.selectedPartName ? "opacity-60" : "")}>
+                  <Label htmlFor="inventory-item-make" className="flex items-center gap-2">
+                    <StepDot step={5} />
+                    Inventory item make
+                  </Label>
+                  <Select
+                    value={form.itemBrandId}
+                    onValueChange={setItemBrand}
+                    disabled={!form.selectedPartName}
+                  >
+                    <SelectTrigger id="inventory-item-make">
+                      <SelectValue
+                        placeholder={
+                          form.selectedPartName ? "Select a make" : "Pick a part first"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableItemMakes.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className={"space-y-2 " + (!form.itemPartId ? "opacity-60" : "")}>
+                  <Label className="flex items-center gap-2">
+                    <StepDot step={6} />
+                    Inventory item part models
+                    {form.itemPartModelIds.length > 0 && (
+                      <Badge variant="secondary" className="ml-1">
+                        {form.itemPartModelIds.length}
+                      </Badge>
+                    )}
+                  </Label>
+                  <div className="min-h-[40px] rounded-md border border-input bg-background p-2">
+                    <MultiSelectChips
+                      options={availablePartModels}
+                      selected={form.itemPartModelIds}
+                      onChange={(ids) => setForm({ ...form, itemPartModelIds: ids })}
+                      emptyMessage={
+                        form.itemPartId
+                          ? "No models available."
+                          : "Pick a part and make first."
+                      }
                     />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableParts.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className={"space-y-2 " + (!form.itemPartId ? "opacity-60" : "")}>
-                <Label className="flex items-center gap-2">
-                  <StepDot step={6} />
-                  Part models
-                  {form.itemPartModelIds.length > 0 && (
-                    <Badge variant="secondary" className="ml-1">
-                      {form.itemPartModelIds.length}
-                    </Badge>
-                  )}
-                </Label>
-                <div className="min-h-[40px] rounded-md border border-input bg-background p-2">
-                  <MultiSelectChips
-                    options={availablePartModels}
-                    selected={form.itemPartModelIds}
-                    onChange={(ids) => setForm({ ...form, itemPartModelIds: ids })}
-                    emptyMessage={
-                      form.itemPartId ? "No models available." : "Pick a part first."
-                    }
-                  />
+                  </div>
                 </div>
               </div>
+
             </div>
           </CardContent>
         </Card>

@@ -29,6 +29,7 @@ import {
   itemPartModels,
 } from "@/lib/mock-data";
 import type { SavedEntry } from "@/lib/relationship-types";
+import { getRelationshipDescription } from "@/lib/compatibility-helper";
 
 export const Route = createFileRoute("/item-first")({
   head: () => ({
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/item-first")({
 });
 
 type Form = {
+  selectedPartName: string;
   itemBrandId: string;
   itemPartId: string;
   itemPartModelIds: string[];
@@ -52,6 +54,7 @@ type Form = {
 };
 
 const empty: Form = {
+  selectedPartName: "",
   itemBrandId: "",
   itemPartId: "",
   itemPartModelIds: [],
@@ -62,19 +65,46 @@ function ItemFirstPage() {
   const [form, setForm] = useState<Form>(empty);
   const [saved, setSaved] = useState<SavedEntry[]>([]);
 
-  const availableParts = useMemo(
-    () => itemParts.filter((p) => p.itemBrandId === form.itemBrandId),
-    [form.itemBrandId],
-  );
-  const availablePartModels = useMemo(
-    () => itemPartModels.filter((m) => m.itemPartId === form.itemPartId),
-    [form.itemPartId],
-  );
+  // ----- Cascading item options (Part first, then Make, then Models) -----
+  const uniquePartNames = useMemo(() => {
+    const names = itemParts.map((p) => p.name);
+    return Array.from(new Set(names));
+  }, []);
 
-  const setItemBrand = (id: string) =>
-    setForm({ ...form, itemBrandId: id, itemPartId: "", itemPartModelIds: [] });
-  const setItemPart = (id: string) =>
-    setForm({ ...form, itemPartId: id, itemPartModelIds: [] });
+  const availableItemMakes = useMemo(() => {
+    if (!form.selectedPartName) return [];
+    const matchingParts = itemParts.filter((p) => p.name === form.selectedPartName);
+    const brandIds = Array.from(new Set(matchingParts.map((p) => p.itemBrandId)));
+    return itemBrands.filter((b) => brandIds.includes(b.id));
+  }, [form.selectedPartName]);
+
+  const availablePartModels = useMemo(() => {
+    if (!form.itemPartId) return [];
+    return itemPartModels.filter((m) => m.itemPartId === form.itemPartId);
+  }, [form.itemPartId]);
+
+  const setSelectedPartName = (name: string) => {
+    setForm({
+      ...form,
+      selectedPartName: name,
+      itemBrandId: "",
+      itemPartId: "",
+      itemPartModelIds: [],
+    });
+  };
+
+  const setItemBrand = (brandId: string) => {
+    const matchedPart = itemParts.find(
+      (p) => p.name === form.selectedPartName && p.itemBrandId === brandId
+    );
+    setForm({
+      ...form,
+      itemBrandId: brandId,
+      itemPartId: matchedPart ? matchedPart.id : "",
+      itemPartModelIds: [],
+    });
+  };
+
   const togglePartModel = (id: string) =>
     setForm({
       ...form,
@@ -84,6 +114,7 @@ function ItemFirstPage() {
     });
 
   const isValid =
+    !!form.selectedPartName &&
     !!form.itemBrandId &&
     !!form.itemPartId &&
     form.itemPartModelIds.length > 0 &&
@@ -162,85 +193,87 @@ function ItemFirstPage() {
         {/* Item selection */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Item Selection</CardTitle>
-            <CardDescription>Select the item, its brand, and the part models.</CardDescription>
+            <CardTitle className="text-base">Inventory item details</CardTitle>
+            <CardDescription>Select the part, the make, and the compatible models.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label>Item Brand</Label>
-                <Select value={form.itemBrandId} onValueChange={setItemBrand}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select brand" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {itemBrands.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>
-                        {b.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label>Inventory item part</Label>
+                  <Select value={form.selectedPartName} onValueChange={setSelectedPartName}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select part" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {uniquePartNames.map((name) => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <Label>Item</Label>
-                <Select
-                  value={form.itemPartId}
-                  onValueChange={setItemPart}
-                  disabled={!form.itemBrandId}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={form.itemBrandId ? "Select item" : "Pick brand first"}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableParts.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="space-y-2">
+                  <Label>Inventory item make</Label>
+                  <Select
+                    value={form.itemBrandId}
+                    onValueChange={setItemBrand}
+                    disabled={!form.selectedPartName}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={form.selectedPartName ? "Select make" : "Pick part first"}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableItemMakes.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <Label>
-                  Item Part Models
-                  {form.itemPartModelIds.length > 0 && (
-                    <Badge variant="secondary" className="ml-2">
-                      {form.itemPartModelIds.length}
-                    </Badge>
-                  )}
-                </Label>
-                <div className="rounded-md border bg-background p-2 min-h-[40px] flex flex-wrap gap-1.5">
-                  {!form.itemPartId && (
-                    <p className="text-sm italic text-muted-foreground">
-                      Pick an item first.
-                    </p>
-                  )}
-                  {form.itemPartId && availablePartModels.length === 0 && (
-                    <p className="text-sm italic text-muted-foreground">No models.</p>
-                  )}
-                  {availablePartModels.map((m) => {
-                    const checked = form.itemPartModelIds.includes(m.id);
-                    return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => togglePartModel(m.id)}
-                        className={
-                          "rounded-full border px-2.5 py-1 text-xs font-mono transition-colors " +
-                          (checked
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border bg-background hover:bg-accent")
-                        }
-                      >
-                        {m.name}
-                      </button>
-                    );
-                  })}
+                <div className="space-y-2">
+                  <Label>
+                    Inventory item part models
+                    {form.itemPartModelIds.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">
+                        {form.itemPartModelIds.length}
+                      </Badge>
+                    )}
+                  </Label>
+                  <div className="rounded-md border bg-background p-2 min-h-[40px] flex flex-wrap gap-1.5">
+                    {!form.itemPartId && (
+                      <p className="text-sm italic text-muted-foreground">
+                        Pick a part and make first.
+                      </p>
+                    )}
+                    {form.itemPartId && availablePartModels.length === 0 && (
+                      <p className="text-sm italic text-muted-foreground">No models.</p>
+                    )}
+                    {availablePartModels.map((m) => {
+                      const checked = form.itemPartModelIds.includes(m.id);
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => togglePartModel(m.id)}
+                          className={
+                            "rounded-full border px-2.5 py-1 text-xs font-mono transition-colors " +
+                            (checked
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-background hover:bg-accent")
+                          }
+                        >
+                          {m.name}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
